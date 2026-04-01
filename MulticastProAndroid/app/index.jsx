@@ -5,19 +5,17 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  SafeAreaView,
-  ActivityIndicator,
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
   const [roomId, setRoomId] = useState('');
   const [streamerName, setStreamerName] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleStartStream = async () => {
+  const handleStartStream = () => {
     if (!roomId.trim()) {
       Alert.alert('Error', 'Please enter a Room ID');
       return;
@@ -27,8 +25,6 @@ export default function HomeScreen() {
       return;
     }
 
-    setIsLoading(true);
-    
     router.push({
       pathname: '/stream/[roomId]',
       params: { 
@@ -36,54 +32,38 @@ export default function HomeScreen() {
         streamerName: streamerName.trim()
       }
     });
-    
-    setIsLoading(false);
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.form}>
-        <View style={styles.header}>
-          <Text style={styles.title}>🎥 MultiCast Pro</Text>
-          <Text style={styles.subtitle}>Android Streamer</Text>
-        </View>
+        <Text style={styles.title}>🎥 MultiCast Pro</Text>
+        <Text style={styles.subtitle}>Android Streamer</Text>
         
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Room ID</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter unique room ID"
-            placeholderTextColor="#999"
-            value={roomId}
-            onChangeText={setRoomId}
-            editable={!isLoading}
-            autoCapitalize="none"
-          />
-        </View>
+        <TextInput
+          style={styles.input}
+          placeholder="Room ID"
+          placeholderTextColor="#999"
+          value={roomId}
+          onChangeText={setRoomId}
+          autoCapitalize="none"
+        />
         
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Your Name</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your name"
-            placeholderTextColor="#999"
-            value={streamerName}
-            onChangeText={setStreamerName}
-            editable={!isLoading}
-          />
-        </View>
+        <TextInput
+          style={styles.input}
+          placeholder="Your Name"
+          placeholderTextColor="#999"
+          value={streamerName}
+          onChangeText={setStreamerName}
+        />
         
-        <TouchableOpacity 
-          style={[styles.startButton, isLoading && styles.disabledButton]} 
-          onPress={handleStartStream}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.startButtonText}>Start Streaming</Text>
-          )}
+        <TouchableOpacity style={styles.startButton} onPress={handleStartStream}>
+          <Text style={styles.startButtonText}>Start Streaming</Text>
         </TouchableOpacity>
+        
+        <Text style={styles.hint}>
+          Share Room ID with viewers to watch your stream
+        </Text>
       </View>
     </SafeAreaView>
   );
@@ -99,28 +79,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
   },
-  header: {
-    alignItems: 'center',
-    marginBottom: 48,
-  },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
+    textAlign: 'center',
     color: '#2196F3',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
+    textAlign: 'center',
     color: '#666',
-  },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
+    marginBottom: 48,
   },
   input: {
     backgroundColor: '#fff',
@@ -129,6 +99,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     borderWidth: 1,
     borderColor: '#e0e0e0',
+    marginBottom: 16,
   },
   startButton: {
     backgroundColor: '#4CAF50',
@@ -142,7 +113,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  disabledButton: {
-    backgroundColor: '#ccc',
+  hint: {
+    textAlign: 'center',
+    fontSize: 12,
+    color: '#999',
+    marginTop: 24,
   },
 });

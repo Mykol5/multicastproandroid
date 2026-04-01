@@ -9,84 +9,76 @@ import {
   BackHandler,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Camera } from 'expo-camera';
+import { RTCView } from 'react-native-webrtc';
 import { useWebRTC } from '../../hooks/useWebRTC';
 
-export default function StreamScreen() {
+export default function StreamScreen() {  // Make sure this is the default export
   const { roomId, streamerName } = useLocalSearchParams();
   const router = useRouter();
-  const cameraRef = useRef(null);
-  
-  const { isStreaming, localStream, roomInfo, startStream, stopStream } = useWebRTC();
+  const { isStreaming, localStream, startStream, stopStream } = useWebRTC();
 
   useEffect(() => {
-    // Start stream when component mounts
     startStream(roomId, streamerName);
     
-    // Handle hardware back button
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-      handleStopAndGoBack();
+      confirmStop();
       return true;
     });
     
     return () => {
       backHandler.remove();
+      stopStream();
     };
   }, []);
 
-  const handleStopAndGoBack = () => {
-    stopStream();
-    router.back();
-  };
-
-  const confirmStopStream = () => {
+  const confirmStop = () => {
     Alert.alert(
       'Stop Streaming',
-      'Are you sure you want to stop your stream?',
+      'Are you sure you want to stop?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Stop', onPress: handleStopAndGoBack, style: 'destructive' },
+        { text: 'Stop', onPress: () => {
+          stopStream();
+          router.back();
+        }, style: 'destructive' }
       ]
     );
   };
 
   if (!isStreaming) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Starting stream...</Text>
-        </View>
-      </SafeAreaView>
+      <View style={styles.container}>
+        <Text style={styles.loadingText}>Starting stream...</Text>
+      </View>
     );
   }
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.streamContainer}>
-        <Camera
-          ref={cameraRef}
-          style={styles.video}
-          type={Camera.Constants.Type.front}
-          ratio="16:9"
-        />
+        {localStream && (
+          <RTCView
+            streamURL={localStream.toURL()}
+            style={styles.video}
+            objectFit="cover"
+            mirror={true}
+          />
+        )}
         
         <View style={styles.controls}>
           <View style={styles.statusContainer}>
-            <Text style={styles.roomText}>Room: {roomInfo.roomId || roomId}</Text>
+            <Text style={styles.roomText}>Room: {roomId}</Text>
             <View style={styles.liveBadge}>
               <Text style={styles.liveText}>🔴 LIVE</Text>
             </View>
           </View>
           
-          <TouchableOpacity style={styles.stopButton} onPress={confirmStopStream}>
+          <TouchableOpacity style={styles.stopButton} onPress={confirmStop}>
             <Text style={styles.stopButtonText}>Stop Streaming</Text>
           </TouchableOpacity>
           
           <Text style={styles.infoText}>
-            Share Room ID "{roomInfo.roomId || roomId}" with viewers
-          </Text>
-          <Text style={styles.infoTextSmall}>
-            Viewers can watch from any browser
+            Share Room ID "{roomId}" with viewers
           </Text>
         </View>
       </View>
@@ -98,9 +90,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-  },
-  loadingContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -110,6 +99,7 @@ const styles = StyleSheet.create({
   },
   streamContainer: {
     flex: 1,
+    width: '100%',
   },
   video: {
     flex: 1,
@@ -159,12 +149,6 @@ const styles = StyleSheet.create({
   infoText: {
     color: '#aaa',
     fontSize: 12,
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  infoTextSmall: {
-    color: '#666',
-    fontSize: 10,
     textAlign: 'center',
   },
 });
