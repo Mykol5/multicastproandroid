@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "MultiCast Pro",
+    "slug": "multicast-pro-android",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "multicastpro",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.multicast.pro",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses camera to stream video",
+        "NSMicrophoneUsageDescription": "This app uses microphone to stream audio"
+      }
+    },
+    "android": {
+      "package": "com.multicast.pro",
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "INTERNET",
+        "MODIFY_AUDIO_SETTINGS"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow MultiCast Pro to access your camera to stream video."
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow MultiCast Pro to access your microphone to stream audio."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
